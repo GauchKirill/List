@@ -1,3 +1,4 @@
+CXX_FLAGS:= -Wall -Wextra
 
 all:
-	@g++ main.c list.cpp -o proga.out
+	@g++ $(CXX_FLAGS) main.c list.cpp list_dump.cpp -o proga.out

@@ -1,50 +1,27 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <limits.h>
 
 #define DUMP
 
 typedef int Elem_t;
 extern const char* Elem_out;
-const int min_size_data = 8; 
+const size_t MIN_SIZE_DATA = 8; 
 
 enum poisons
 {
-	POISON      = -1,
+	POISON      = INT_MIN,
 	POISON_DATA =  0,
-	POISON_NAME =  0,
 	POISON_SIZE = -1,
-	POISON_LINE = -1,
 };
-
-enum errors
-{
-	LIST_OK        		= 0x0,
-	HAS_NOT_MEMORY 		= 0x1, //todo 1 << 1
-	LIST_NULL_PTR  		= 0x2,
-	LIST_NULL_PTR_DATA 	= 0x4,
-	WRONG_DATA			= 0x8,
-	LIST_SKIP_ELEM		= 0x10,
-	INVALID_SIZE		= 0x20,
-	INDEX_IS_FREE		= 0x40,
-	EXTRACT_FROM_FREE	= 0x80,
-	LIST_IS_EMPTY		= 0x100,
-};
-/*
-enum modes
-{
-	INSERT_IN_TAIL = 0,
-	INSERT_IN_HEAD = 0,
-};*/
 
 typedef struct
 {
 	Elem_t elem;
-	int next;
-	int prev;
+	size_t next;
+	size_t prev;
 } elem;
 
 #ifdef DUMP
@@ -57,18 +34,30 @@ typedef struct
 	size_t  size;
 } list;
 
-list* ListCtor   		(size_t n);
-Elem_t list_pop 		(list* ls);
-void ListInsert_head(list* ls, Elem_t x, size_t ip, size_t* index);
-void ListInsert_tail(list* ls, Elem_t x, size_t ip, size_t* index);
-void PrintfList  	(list* ls);
+#define data_of(ind) ls->data[ind].elem
+#define next_of(ind) ls->data[ind].next
+#define prev_of(ind) ls->data[ind].prev
+#define SIZE ls->size - 1
 
-void 	 ListSort 	 	(list* ls);
-int 	 List_Compare 	(const void* a, const void* b);
-void 	 List_Dtor 	 	(list* ls);
-unsigned List_Verify 	(list* ls);
+#define data_of_new(ind) new_ls->data[ind].elem
+#define next_of_new(ind) new_ls->data[ind].next
+#define prev_of_new(ind) new_ls->data[ind].prev
+#define NEW_SIZE new_ls->size - 1
 
-size_t Find_index_by_num(const list* ls, Elem_t x);
-size_t Find_index 		(const list* ls, size_t index);
+list*  list_ctor   	         (size_t size);
+Elem_t list_pop 	         (list* ls);
+size_t list_insert_head      (list** ls_ptr, Elem_t val);
+size_t list_insert_tail      (list** ls_ptr, Elem_t val);
+size_t list_insert_after_ind (list** ls_ptr, size_t ind, Elem_t val);
+size_t list_insert_before_ind(list** ls_ptr, size_t ind, Elem_t val);
+
+list* list_up_size  (list* ls);
+void  list_sort     (list* ls);
+int   list_compare  (const void* a, const void* b);
+void  list_dtor     (list* ls);
+
+size_t find_ind_by_num (const list* ls, Elem_t x);
+size_t find_logical_ind(const list* ls, size_t ind);
+size_t at_list         (const list* ls, size_t ind);
 
 #endif

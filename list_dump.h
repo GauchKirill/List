@@ -1,6 +1,9 @@
 #ifndef DUMP_H
 #define DUMP_H
 
-unsigned ListDump    		(list* ls, unsigned err);
+#include "list.h"
+
+void     list_dump	(const list* ls, unsigned err);
+unsigned list_verify(const list* ls);
 
 #endif
