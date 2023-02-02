@@ -9,7 +9,10 @@ int main()
 	Elem_t val = 0;
 	while(scanf("%d", &val) == 1)
 	{
-		printf("in %zu\n", list_insert_head(&ls, val));
+		size_t num = 0;
+		if (list_insert_tail(&ls, val, &num))
+			abort();
+		printf("in %zu\n", num);
 	}
 	while(true)
 	{
@@ -17,8 +20,12 @@ int main()
 		scanf("%s", s);
 		if (s[0] == 'q')
 			break;
-		printf("pop: %d\n", list_pop(ls));
+		if (list_pop(ls, &val))
+			abort();
+		printf("pop: %d\n", val);
 	}
-	list_sort(ls);
-	list_dump(ls, PRINT_LIST);
+	if (list_sort(ls))
+		abort();
+	if (list_dump(ls, PRINT_LIST))
+		abort()	;
 }

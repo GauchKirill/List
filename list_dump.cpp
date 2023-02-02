@@ -11,10 +11,9 @@ const char* Elem_out = "%d";
 	sprintf (cmd, "dot -Tpng %s -o graph.png", name_graph_file);\
 	system  (cmd);                                              \
 	printf  ("Runtime error. Open \"graph.png\"\n");            \
-	abort();                                                    \
-	return;
+	return err;
 
-void list_dump (const list* ls, unsigned err)
+size_t list_dump (const list* ls, size_t err)
 {
 	const size_t LENGHT_CMD = 50;
 	char cmd[LENGHT_CMD] = {};
@@ -25,7 +24,7 @@ void list_dump (const list* ls, unsigned err)
 	err |= list_verify (ls);
 
 	if (err == LIST_OK)
-		return;
+		return LIST_OK;
 
 	fprintf (graph_file,
 			"digraph G{\n"
@@ -104,14 +103,15 @@ void list_dump (const list* ls, unsigned err)
 	fprintf (graph_file, "}\n");
 	fclose  (graph_file);   
 	sprintf (cmd, "dot -Tpng %s -o graph.png", name_graph_file);
-	system  (cmd);                                       
+	system  (cmd);
+	return LIST_OK;                                     
 }
 
 #undef finish_dump
 
-unsigned list_verify (const list* ls)
+size_t list_verify (const list* ls)
 {
-	unsigned err = LIST_OK;
+	size_t err = LIST_OK;
 
 	if (!ls)
 		return LIST_NULL_PTR;
@@ -119,42 +119,34 @@ unsigned list_verify (const list* ls)
 	if (!ls->data || ls->data == (elem*) POISON_DATA)
 		return LIST_NULL_PTR_DATA;
 	
-	if (ls->size == (unsigned) POISON_SIZE)
+	if (ls->size == (size_t) POISON_SIZE)
 		return INVALID_SIZE;
 
 	size_t 	busy_elem = 1,
-	        free_elem = 1,
-	        ind       = 0,
-			next_ind  = 0;
+	        free_elem = 1;
 
 	for (size_t i_elem = 0; i_elem <= SIZE; ++i_elem)
 		if (!(ls->data + i_elem))
 			return WRONG_DATA;
 
-	while(next_of(ind) != 0 && busy_elem <= SIZE)
+	for(size_t ind = 0, next_ind = 0; next_of(ind) != 0 && busy_elem <= SIZE; ind = next_ind, busy_elem++)
 	{
 		next_ind = next_of(ind);
-		if (ind      > SIZE || next_ind > SIZE)
+		if (ind > SIZE || next_ind > SIZE)
 			return WRONG_IND;
 
 		if (ind != prev_of(next_ind))
 			err |= WRONG_IND;
-
-		ind = next_ind;
-		busy_elem++;
 	}
-	ind = SIZE;
-	while(next_of(ind) != SIZE && free_elem <= SIZE)
+
+	for(size_t ind = SIZE, next_ind = SIZE; next_of(ind) != SIZE && free_elem <= SIZE; ind = next_ind, free_elem++)
 	{
 		next_ind = next_of(ind);
-		if (ind      > SIZE || next_ind > SIZE)
+		if (ind > SIZE || next_ind > SIZE)
 			return WRONG_IND;
 
 		if (ind != prev_of(next_ind))
 			err |= WRONG_IND;
-
-		ind = next_ind;
-		free_elem++;
 	}
 
 	if (free_elem + busy_elem != ls->size) err |= WRONG_IND;

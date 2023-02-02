@@ -3,7 +3,7 @@
 
 #include "list.h"
 
-void     list_dump	(const list* ls, unsigned err);
-unsigned list_verify(const list* ls);
+size_t list_dump  (const list* ls, size_t err);
+size_t list_verify(const list* ls);
 
 #endif

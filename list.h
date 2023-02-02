@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <limits.h>
+#include <cstdint>
 
 #define DUMP
 
@@ -14,7 +15,7 @@ enum poisons
 {
 	POISON      = INT_MIN,
 	POISON_DATA =  0,
-	POISON_SIZE = -1,
+	POISON_SIZE = SIZE_MAX,
 };
 
 typedef struct
@@ -45,19 +46,19 @@ typedef struct
 #define NEW_SIZE new_ls->size - 1
 
 list*  list_ctor   	         (size_t size);
-Elem_t list_pop 	         (list* ls);
-size_t list_insert_head      (list** ls_ptr, Elem_t val);
-size_t list_insert_tail      (list** ls_ptr, Elem_t val);
-size_t list_insert_after_ind (list** ls_ptr, size_t ind, Elem_t val);
-size_t list_insert_before_ind(list** ls_ptr, size_t ind, Elem_t val);
+size_t list_pop 	         (list* ls,      Elem_t* returned_val);
+size_t list_insert_head      (list** ls_ptr, Elem_t val, size_t* returned_num);
+size_t list_insert_tail      (list** ls_ptr, Elem_t val, size_t* returned_num);
+size_t list_insert_after_ind (list** ls_ptr, size_t ind, Elem_t val, size_t* returned_num);
+size_t list_insert_before_ind(list** ls_ptr, size_t ind, Elem_t val, size_t* returned_num);
 
-list* list_up_size  (list* ls);
-void  list_sort     (list* ls);
-int   list_compare  (const void* a, const void* b);
-void  list_dtor     (list* ls);
+size_t  list_up_size  (list* ls, list** returned_ls);
+size_t  list_sort     (list* ls);
+int     list_compare  (const void* a, const void* b);
+void    list_dtor     (list* ls);
 
-size_t find_ind_by_num (const list* ls, Elem_t x);
-size_t find_logical_ind(const list* ls, size_t ind);
-size_t at_list         (const list* ls, size_t ind);
+size_t find_ind_by_num (const list* ls, Elem_t val, size_t* returned_ind);
+size_t find_logical_ind(const list* ls, size_t ind, size_t* returned_serial_num);
+size_t at_list         (const list* ls, size_t ind, size_t* returned_ip);
 
 #endif

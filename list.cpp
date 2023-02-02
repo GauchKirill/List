@@ -5,119 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Elem_t list_pop (list* ls)
-{
-	#ifdef DUMP
-
-		unsigned err = list_verify (ls);
-		if (next_of(0) == 0) err |= LIST_IS_EMPTY;
-		list_dump(ls, err);
-
-	#endif
-
-	size_t num_out = prev_of(0);
-	Elem_t val = data_of(num_out);
-
-	size_t prev = prev_of(num_out);
-	size_t next = next_of(num_out);
-
-	next_of(prev) = next;
-	prev_of(next) = prev;
-
-	prev_of(num_out) = SIZE;
-	next_of(num_out) = next_of(SIZE);
-
-	data_of(num_out) = POISON;
-	next_of(SIZE) = num_out;
-	prev_of(SIZE) = num_out;
-
-	#ifdef DUMP
-
-		list_dump(ls, list_verify(ls));
-	
-	#endif
-		
-	return val;
-}
-
-size_t list_insert_head(list** ls_ptr, Elem_t val)
-{
-	return list_insert_after_ind(ls_ptr, 0, val);
-}
-
-
-size_t list_insert_tail(list** ls_ptr, Elem_t val)
-{
-	return list_insert_before_ind(ls_ptr, 0, val);
-}
-
-size_t list_insert_after_ind(list** ls_ptr, size_t ind, Elem_t val)
-{
-	list* ls = *ls_ptr;
-
-	#ifdef DUMP
-
-		list_dump(ls, list_verify(ls));
-
-	#endif
-	
-	if(at_list(ls, ind) != ind)
-		return 0;
-
-	if (next_of(SIZE) == SIZE)
-		ls = list_up_size(ls);
-
-	size_t num_free      = next_of(SIZE);
-	size_t new_num_free  = next_of(num_free);
-	size_t next_for_elem = next_of(ind);
-
-	next_of(SIZE)         = new_num_free;
-	prev_of(new_num_free) = SIZE;
-
-	data_of(num_free) = val;
-	prev_of(num_free) = ind;
-	next_of(num_free) = next_for_elem;
-
-	next_of(ind) = num_free;
-	prev_of(next_for_elem) = num_free;
-
-	*ls_ptr = ls;
-	return num_free;
-}
-
-size_t list_insert_before_ind(list** ls_ptr, size_t ind, Elem_t val)
-{
-	list* ls = *ls_ptr;
-	#ifdef DUMP
-
-		list_dump(ls, list_verify(ls));
-
-	#endif
-
-	if(at_list(ls, ind) != ind)
-		return 0;
-
-	if (next_of(SIZE) == SIZE)
-		ls = list_up_size(ls);
-
-	size_t num_free      = next_of(SIZE);
-	size_t new_num_free  = next_of(num_free);
-	size_t prev_for_elem = prev_of(ind);
-
-	next_of(SIZE) = new_num_free;
-	prev_of(new_num_free) = SIZE;
-	
-	data_of(num_free) = val;
-	next_of(num_free) = ind;
-	prev_of(num_free) = prev_for_elem;
-	
-	prev_of(ind) = num_free;
-	next_of(prev_for_elem) = num_free;
-
-	*ls_ptr = ls;
-	return num_free;
-}
-
 list* list_ctor (size_t size)
 {
 	if (size < MIN_SIZE_DATA) size = MIN_SIZE_DATA;
@@ -157,20 +44,165 @@ void list_dtor (list* ls)
 		return;
 	
 	free (ls->data);
-	ls->data = (elem*) POISON_DATA;
+	ls->data = (elem*)  POISON_DATA;
 	ls->size = (size_t) POISON_SIZE;
 }
 
-void list_sort (list* ls)
+size_t list_insert_head(list** ls_ptr, Elem_t val, size_t* returned_num)
 {
+	return list_insert_after_ind(ls_ptr, 0, val, returned_num);
+}
+
+
+size_t list_insert_tail(list** ls_ptr, Elem_t val, size_t* returned_num)
+{
+	return list_insert_before_ind(ls_ptr, 0, val, returned_num);
+}
+
+size_t list_insert_after_ind(list** ls_ptr, size_t ind, Elem_t val, size_t* returned_num)
+{
+	size_t err = LIST_OK;
+	list* ls = *ls_ptr;
+
 	#ifdef DUMP
 
-		list_dump(ls, list_verify(ls));
+		if ((err = list_dump(ls, list_verify(ls)))) return err;
+
+	#endif
+	
+	size_t returned_ind = 0;
+	if ((err = at_list(ls, ind, &returned_ind)))
+		return err;
+
+	if(returned_ind != ind)
+	{
+		*returned_num = 0;
+		return LIST_OK;
+	}
+
+	if (next_of(SIZE) == SIZE)
+	{
+		if ((err = list_up_size(ls, &ls)))
+			return err;
+	}
+
+	size_t num_free      = next_of(SIZE),
+	       new_num_free  = next_of(num_free),
+	       next_for_elem = next_of(ind);
+
+	next_of(SIZE)         = new_num_free;
+	prev_of(new_num_free) = SIZE;
+
+	data_of(num_free) = val;
+	prev_of(num_free) = ind;
+	next_of(num_free) = next_for_elem;
+
+	next_of(ind) = num_free;
+	prev_of(next_for_elem) = num_free;
+
+	*ls_ptr = ls;
+	*returned_num = num_free;
+
+	return err;
+}
+
+size_t list_insert_before_ind(list** ls_ptr, size_t ind, Elem_t val, size_t* returned_num)
+{
+	size_t err = LIST_OK;
+	list* ls = *ls_ptr;
+
+	#ifdef DUMP
+
+		if ((err = list_dump(ls, list_verify(ls)))) return err;
 
 	#endif
 
-	size_t ind = 0;
-	size_t i = 0;
+	size_t returned_ind = 0;
+	if ((err = at_list(ls, ind, &returned_ind)))
+		return err;
+
+	if(returned_ind != ind)
+	{
+		*returned_num = 0;
+		return LIST_OK;
+	}
+
+	if (next_of(SIZE) == SIZE)
+	{
+		if ((err = list_up_size(ls, &ls)))
+			return err;
+	}
+
+	size_t num_free      = next_of(SIZE),
+	       new_num_free  = next_of(num_free),
+	       prev_for_elem = prev_of(ind);
+
+	next_of(SIZE) = new_num_free;
+	prev_of(new_num_free) = SIZE;
+	
+	data_of(num_free) = val;
+	next_of(num_free) = ind;
+	prev_of(num_free) = prev_for_elem;
+	
+	prev_of(ind) = num_free;
+	next_of(prev_for_elem) = num_free;
+
+	*ls_ptr = ls;
+	*returned_num = num_free;
+
+	return err;
+}
+
+size_t list_pop (list* ls, Elem_t* returned_val)
+{
+	size_t err = LIST_OK;
+
+	#ifdef DUMP
+
+		err = list_verify (ls);
+		if (next_of(0) == 0) err |= LIST_IS_EMPTY;
+		if ((err = list_dump(ls, err))) return err;
+
+	#endif
+
+	size_t num_out = prev_of(0);
+	Elem_t val = data_of(num_out);
+
+	size_t prev = prev_of(num_out),
+	       next = next_of(num_out);
+
+	next_of(prev) = next;
+	prev_of(next) = prev;
+
+	prev_of(num_out) = SIZE;
+	next_of(num_out) = next_of(SIZE);
+
+	data_of(num_out) = POISON;
+	next_of(SIZE) = num_out;
+	prev_of(SIZE) = num_out;
+
+	#ifdef DUMP
+
+		if ((err = list_dump(ls, list_verify(ls)))) return err;
+	
+	#endif
+		
+	*returned_val = val;
+	return err;
+}
+
+size_t list_sort (list* ls)
+{
+	size_t err = LIST_OK;
+
+	#ifdef DUMP
+
+		if ((err = list_dump(ls, list_verify(ls)))) return err;
+
+	#endif
+
+	size_t ind = 0,
+	       i = 0;
 
 	do
 	{
@@ -183,8 +215,7 @@ void list_sort (list* ls)
 	{
 		prev_of(ind) = i++;
 		ind = next_of(ind);
-	} while (ind != SIZE);
-	prev_of(ind) = i++;
+	} while (ind != next_of(SIZE));
 
 	qsort (ls->data, ls->size, sizeof(elem), list_compare);
 
@@ -205,6 +236,8 @@ void list_sort (list* ls)
 
 	next_of(i) = j;
 	prev_of(j) = i;
+
+	return err;
 }
 
 int list_compare (const void* a, const void* b)
@@ -215,30 +248,26 @@ int list_compare (const void* a, const void* b)
 	return (a_ptr->prev < b_ptr->prev) ? -1 : 1;
 }
 
-list* list_up_size(list* ls)
+size_t list_up_size(list* ls, list** returned_ls)
 {
+	size_t err = LIST_OK;
+
 	#ifdef DUMP
 
-		list_dump(ls, list_verify(ls));
+		if ((err = list_dump(ls, list_verify(ls)))) return err;
 
 	#endif
 
-	size_t size = ls->size;
-	size_t new_size = 2*size;
+	size_t size = ls->size,
+	       new_size = 2*size;
 	list* new_ls = (list*) calloc(1, sizeof(list));
 	if (!new_ls)
-	{
-		list_dump(ls, HAS_NOT_MEMORY);
-		return ls;
-	}
+		return list_dump(ls, HAS_NOT_MEMORY);
 
 	new_ls->size = new_size;
 	new_ls->data = (elem*) realloc(ls->data, new_size*sizeof(elem));
 	if (!new_ls->data)
-	{
-		list_dump(ls, HAS_NOT_MEMORY);
-		return ls;
-	}
+		return list_dump(ls, HAS_NOT_MEMORY);
 
 	free(ls);
 
@@ -251,14 +280,17 @@ list* list_up_size(list* ls)
 		prev_of_new(i_elem) = (i_elem == size - 1) ? prev_of_new(size - 1) : i_elem - 1;
 	}
 
-	return new_ls;
+	*returned_ls = new_ls;
+	return err;
 }
 
-size_t find_ind_by_num (const list* ls, Elem_t x)
+size_t find_ind_by_num (const list* ls, Elem_t val, size_t* returned_ind)
 {
+	size_t err = LIST_OK;
+
 	#ifdef DUMP
 
-		list_dump(ls, list_verify(ls));
+		if ((err = list_dump(ls, list_verify(ls)))) return err;
 
 	#endif
 
@@ -266,17 +298,20 @@ size_t find_ind_by_num (const list* ls, Elem_t x)
 	do
 	{
 		ind = next_of(ind);
-		if (data_of(ind) == x) break;
+		if (data_of(ind) == val) break;
 	} while (ind != 0);
 
-	return ind;
+	*returned_ind = ind;
+	return err;
 }
 
-size_t at_list (const list* ls, size_t ind)
+size_t at_list (const list* ls, size_t ind, size_t* returned_ip)
 {
+	size_t err = LIST_OK;
+
 	#ifdef DUMP
 
-		list_dump(ls, list_verify(ls));
+		if ((err = list_dump(ls, list_verify(ls)))) return err;
 
 	#endif
 
@@ -287,22 +322,23 @@ size_t at_list (const list* ls, size_t ind)
 		ip = next_of(ip);
 	} while (ip != 0);
 
-	return ip;
+	*returned_ip = ip;
+	return err;
 }
 
-size_t find_logical_ind(const list* ls, size_t ind)
+size_t find_logical_ind(const list* ls, size_t ind, size_t* returned_serial_num)
 {
+	size_t err = LIST_OK;
+
 	#ifdef DUMP
 
-		list_dump(ls, list_verify(ls));
+		if ((err = list_dump(ls, list_verify(ls)))) return err;
 
 	#endif
 
 	size_t serial_num = 0;
-	size_t i = next_of(0);
-	while (true)
+	for (size_t i = 0; true; serial_num++)
 	{
-		serial_num++;
 		if (i == ind) break;
 		if (next_of(i) == 0)
 		{
@@ -311,5 +347,6 @@ size_t find_logical_ind(const list* ls, size_t ind)
 		}
 	}
 
-	return serial_num;
+	*returned_serial_num = serial_num;
+	return err;
 }
