@@ -240,6 +240,61 @@ size_t list_sort (list* ls)
 	return err;
 }
 
+size_t list_linear_sort (list** ls_ptr)
+{
+	size_t err = LIST_OK;
+	list* ls = *ls_ptr;
+
+	#ifdef DUMP
+
+		if ((err = list_dump(ls, list_verify(ls)))) return err;
+
+	#endif
+
+	list* new_ls = nullptr;
+
+	new_ls = (list*) calloc(1, sizeof(list));
+	if (!new_ls)
+		return HAS_NOT_MEMORY;
+
+	new_ls->size = ls->size;
+	new_ls->data = (elem*) calloc(new_ls->size, sizeof(elem));
+	if (!new_ls->data)
+		return HAS_NOT_MEMORY;
+
+	size_t ind_new_ls = 0,
+           ind = 0;
+
+	for (; next_of(ind) != 0; ind = next_of(ind), ind_new_ls++)
+	{
+		data_of_new(ind_new_ls) = data_of(ind);
+		next_of_new(ind_new_ls) = (ind_new_ls) + 1;
+		prev_of_new(ind_new_ls) = (ind_new_ls) - 1;
+	}
+	data_of_new(ind_new_ls) = data_of(ind);
+	next_of_new(ind_new_ls) = 0;
+	prev_of_new(ind_new_ls) = ind_new_ls - 1;
+	prev_of_new(0) = ind_new_ls++;
+
+	for(ind = next_of(SIZE); ind != SIZE; ind = next_of(ind), ind_new_ls++)
+	{
+		data_of_new(ind_new_ls) = data_of(ind);
+		next_of_new(ind_new_ls) = (ind_new_ls) + 1;
+		prev_of_new(ind_new_ls) = (ind_new_ls) - 1;
+	}
+
+	data_of_new(ind_new_ls) = data_of(ind);
+	next_of_new(ind_new_ls) = prev_of_new(0) + 1;
+	prev_of_new(ind_new_ls) = ind_new_ls - 1;
+	prev_of_new(prev_of_new(0) + 1) = NEW_SIZE;
+
+	free(ls->data);
+	free(ls);
+
+	*ls_ptr = new_ls;
+	return LIST_OK;	
+}
+
 int list_compare (const void* a, const void* b)
 {
 	const elem* a_ptr = (const elem*) a;

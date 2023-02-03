@@ -54,6 +54,7 @@ size_t list_insert_before_ind(list** ls_ptr, size_t ind, Elem_t val, size_t* ret
 
 size_t  list_up_size  (list* ls, list** returned_ls);
 size_t  list_sort     (list* ls);
+size_t  list_linear_sort (list** ls_ptr);
 int     list_compare  (const void* a, const void* b);
 void    list_dtor     (list* ls);
 
