@@ -64,11 +64,7 @@ size_t list_insert_after_ind(list** ls_ptr, size_t ind, Elem_t val, size_t* retu
 	size_t err = LIST_OK;
 	list* ls = *ls_ptr;
 
-	#ifdef DUMP
-
-		if ((err = list_dump(ls, list_verify(ls)))) return err;
-
-	#endif
+	CHECK_ERR(err = list_dump(ls, list_verify(ls)))
 	
 	size_t returned_ind = 0;
 	if ((err = at_list(ls, ind, &returned_ind)))
@@ -111,11 +107,7 @@ size_t list_insert_before_ind(list** ls_ptr, size_t ind, Elem_t val, size_t* ret
 	size_t err = LIST_OK;
 	list* ls = *ls_ptr;
 
-	#ifdef DUMP
-
-		if ((err = list_dump(ls, list_verify(ls)))) return err;
-
-	#endif
+	CHECK_ERR(err = list_dump(ls, list_verify(ls)))
 
 	size_t returned_ind = 0;
 	if ((err = at_list(ls, ind, &returned_ind)))
@@ -157,13 +149,9 @@ size_t list_pop (list* ls, Elem_t* returned_val)
 {
 	size_t err = LIST_OK;
 
-	#ifdef DUMP
-
-		err = list_verify (ls);
-		if (next_of(0) == 0) err |= LIST_IS_EMPTY;
-		if ((err = list_dump(ls, err))) return err;
-
-	#endif
+	err = list_verify (ls);
+	if (next_of(0) == 0) err |= LIST_IS_EMPTY;
+	CHECK_ERR(err = list_dump(ls, err))
 
 	size_t num_out = prev_of(0);
 	Elem_t val = data_of(num_out);
@@ -195,12 +183,8 @@ size_t list_sort (list* ls)
 {
 	size_t err = LIST_OK;
 
-	#ifdef DUMP
-
-		if ((err = list_dump(ls, list_verify(ls)))) return err;
-
-	#endif
-
+	CHECK_ERR(err = list_dump(ls, list_verify(ls)))
+	
 	size_t ind = 0,
 	       i = 0;
 
@@ -245,12 +229,8 @@ size_t list_linear_sort (list** ls_ptr)
 	size_t err = LIST_OK;
 	list* ls = *ls_ptr;
 
-	#ifdef DUMP
-
-		if ((err = list_dump(ls, list_verify(ls)))) return err;
-
-	#endif
-
+	CHECK_ERR(err = list_dump(ls, list_verify(ls)))
+	
 	list* new_ls = nullptr;
 
 	new_ls = (list*) calloc(1, sizeof(list));
@@ -276,18 +256,18 @@ size_t list_linear_sort (list** ls_ptr)
 	prev_of_new(ind_new_ls) = ind_new_ls - 1;
 	prev_of_new(0) = ind_new_ls++;
 
-	for(ind = next_of(SIZE); ind != SIZE; ind = next_of(ind), ind_new_ls++)
+	size_t first_free_place = ind_new_ls;
+
+	for (; ind_new_ls <= NEW_SIZE; ++ind_new_ls)
 	{
-		data_of_new(ind_new_ls) = data_of(ind);
-		next_of_new(ind_new_ls) = (ind_new_ls) + 1;
-		prev_of_new(ind_new_ls) = (ind_new_ls) - 1;
+		data_of_new(ind_new_ls) = POISON;
+		next_of_new(ind_new_ls) = ind_new_ls + 1;
+		prev_of_new(ind_new_ls) = ind_new_ls - 1;
 	}
 
-	data_of_new(ind_new_ls) = data_of(ind);
-	next_of_new(ind_new_ls) = prev_of_new(0) + 1;
-	prev_of_new(ind_new_ls) = ind_new_ls - 1;
-	prev_of_new(prev_of_new(0) + 1) = NEW_SIZE;
-
+	prev_of_new(first_free_place) = NEW_SIZE;
+	next_of_new(NEW_SIZE) = first_free_place;
+	
 	free(ls->data);
 	free(ls);
 
@@ -307,12 +287,8 @@ size_t list_up_size(list* ls, list** returned_ls)
 {
 	size_t err = LIST_OK;
 
-	#ifdef DUMP
-
-		if ((err = list_dump(ls, list_verify(ls)))) return err;
-
-	#endif
-
+	CHECK_ERR(err = list_dump(ls, list_verify(ls)))
+	
 	size_t size = ls->size,
 	       new_size = 2*size;
 	list* new_ls = (list*) calloc(1, sizeof(list));
@@ -343,12 +319,8 @@ size_t find_ind_by_num (const list* ls, Elem_t val, size_t* returned_ind)
 {
 	size_t err = LIST_OK;
 
-	#ifdef DUMP
-
-		if ((err = list_dump(ls, list_verify(ls)))) return err;
-
-	#endif
-
+	CHECK_ERR(err = list_dump(ls, list_verify(ls)))
+	
 	size_t ind = 0;
 	do
 	{
@@ -364,12 +336,8 @@ size_t at_list (const list* ls, size_t ind, size_t* returned_ip)
 {
 	size_t err = LIST_OK;
 
-	#ifdef DUMP
-
-		if ((err = list_dump(ls, list_verify(ls)))) return err;
-
-	#endif
-
+	CHECK_ERR(err = list_dump(ls, list_verify(ls)))
+	
 	size_t ip = 0;
 	do
 	{
@@ -385,12 +353,8 @@ size_t find_logical_ind(const list* ls, size_t ind, size_t* returned_serial_num)
 {
 	size_t err = LIST_OK;
 
-	#ifdef DUMP
-
-		if ((err = list_dump(ls, list_verify(ls)))) return err;
-
-	#endif
-
+	CHECK_ERR(err = list_dump(ls, list_verify(ls)))
+	
 	size_t serial_num = 0;
 	for (size_t i = 0; true; serial_num++)
 	{

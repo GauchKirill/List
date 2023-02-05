@@ -7,6 +7,12 @@
 
 #define DUMP
 
+#ifdef DUMP
+	#define CHECK_ERR(cond) if((cond)) return err;
+#else
+	#define CHECK_ERR(cond)
+#endif
+
 typedef int Elem_t;
 extern const char* Elem_out;
 const size_t MIN_SIZE_DATA = 8; 

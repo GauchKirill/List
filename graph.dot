@@ -1,0 +1,33 @@
+digraph G{
+	rankdir=LR;
+	node[shape="rectangle",fontsize=14];
+	edge[arrowhead="open"];
+    list[shape=record, label="{ ptr = 0x558fd09fdd80 | data = 0x558fd09fdda0 | size = 9 }"];
+	V0[shape=record, label=" num: 0 | val: 0 | <next> next: 1 | <prev> prev: 5 ",fillcolor="lightgrey"];
+	V0:<next>->V1[color="red"];
+	V0:<prev>->V5[color="blue"];
+	V1[shape=record, label=" num: 1 | val: 7 | <next> next: 2 | <prev> prev: 0 ",fillcolor="lightgrey"];
+	V1:<next>->V2[color="red"];
+	V1:<prev>->V0[color="blue"];
+	V2[shape=record, label=" num: 2 | val: 6 | <next> next: 3 | <prev> prev: 1 ",fillcolor="lightgrey"];
+	V2:<next>->V3[color="red"];
+	V2:<prev>->V1[color="blue"];
+	V3[shape=record, label=" num: 3 | val: 5 | <next> next: 4 | <prev> prev: 2 ",fillcolor="lightgrey"];
+	V3:<next>->V4[color="red"];
+	V3:<prev>->V2[color="blue"];
+	V4[shape=record, label=" num: 4 | val: 34 | <next> next: 5 | <prev> prev: 3 ",fillcolor="lightgrey"];
+	V4:<next>->V5[color="red"];
+	V4:<prev>->V3[color="blue"];
+	V5[shape=record, label=" num: 5 | val: 78 | <next> next: 0 | <prev> prev: 4 ",fillcolor="lightgrey"];
+	V5:<next>->V0[color="red"];
+	V5:<prev>->V4[color="blue"];
+	V6[shape=record, label=" num: 6 | val: -2147483648 | <next> next: 7 | <prev> prev: 8 ",fillcolor="lightgrey"];
+	V6:<next>->V7[color="red"];
+	V6:<prev>->V8[color="blue"];
+	V7[shape=record, label=" num: 7 | val: -2147483648 | <next> next: 8 | <prev> prev: 6 ",fillcolor="lightgrey"];
+	V7:<next>->V8[color="red"];
+	V7:<prev>->V6[color="blue"];
+	V8[shape=record, label=" num: 8 | val: -2147483648 | <next> next: 6 | <prev> prev: 7 ",fillcolor="lightgrey"];
+	V8:<next>->V6[color="red"];
+	V8:<prev>->V7[color="blue"];
+}
